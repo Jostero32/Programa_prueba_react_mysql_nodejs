@@ -5,30 +5,22 @@ import {
 } from "react-router-dom";
 import Login from './login/login.jsx';
 import Home from './home/home.jsx';
-import { AuthProvider } from './authContext.js';
-import ProtectedRoute from './protectedRoute.js';
+
 
 function App() {
 
 
   return (
-    <AuthProvider>
+
+    <div className="App">
       <Router>
-        <div className="App">
-          <Routes>
-            <Route path='/' element={<Login />} />
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </div>
+        <Routes>
+          <Route path='/' element={<Login />} />
+          <Route path='/home' element={<Home />} />
+        </Routes>
       </Router>
-    </AuthProvider>
+
+    </div>
 
 
   );
