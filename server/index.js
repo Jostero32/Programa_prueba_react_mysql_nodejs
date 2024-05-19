@@ -55,9 +55,8 @@ app.post('/login', (req, res) => {
   db.query('SELECT * FROM docentes WHERE correo = ? and contraseña=? ', [req.body.email, req.body.clave], (err, results) => {
     if (err) return res.json("Error");
     if (results.length > 0) {
-      console.log(req.session.email);
       req.session.email = results[0].correo;
-      console.log(req.session.email);
+      req.session.idDocente = results[0].id;
       return res.json(results);
     } else {
       return res.json("No hay registro");
@@ -65,6 +64,17 @@ app.post('/login', (req, res) => {
   });
 });
 
+
+app.get('/seleccionEstudiantes', (req, res) => {
+  db.query('SELECT * FROM estudiantes WHERE id_docente = ? ', [req.session.idDocente], (err, results) => {
+    if (err) return res.json("Error");
+    if (results.length > 0) {
+      return res.json(results);
+    } else {
+      return res.json("No hay registro");
+    }
+  });
+});
 
 app.listen(3001, () => {
   console.log("Corriendo en el puerto 3001")

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "./barranavegar.jsx";
 
 function Home() {
-  const [usuario, setUsuario] = useState([]);
+  const [estudiantes, setEstudiantes] = useState([]);
   const navegar = useNavigate();
 
   Axios.defaults.withCredentials = true;
@@ -14,6 +14,11 @@ function Home() {
     Axios.get("http://localhost:3001")
       .then((res) => {
         if (res.data.valid) {
+          Axios.get("http://localhost:3001/seleccionEstudiantes")
+            .then((res) => {
+              setEstudiantes(res.data);
+            })
+            .catch((err) => console.log(err));
         } else {
           navegar("/");
         }
@@ -22,24 +27,26 @@ function Home() {
   }, []);
   return (
     <>
-    <Navbar/>
+      <Navbar />
       <div className="container">
         <table className="table">
           <thead>
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">First</th>
-              <th scope="col">Last</th>
-              <th scope="col">Handle</th>
+              <th scope="col">Nombre</th>
+              <th scope="col">Carrera</th>
+              <th scope="col">Progreso</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>@mdo</td>
-            </tr>
+            {estudiantes.map((val, key) => {
+              return <tr key={key}>
+                <th scope="row">{val.nombre}</th>
+                <td>{val.carrera}</td>
+                <td>{val.progreso}</td>
+                <td></td>
+              </tr>
+            })}
           </tbody>
         </table>
       </div>
