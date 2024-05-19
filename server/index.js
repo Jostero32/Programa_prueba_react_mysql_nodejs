@@ -42,7 +42,19 @@ app.get('/seleccionUsuarios', (req, res) => {
   });
 
 
+  app.get('/login', (req, res) => {
+    const usuario= req.body.usuario;
+    const clave= req.body.clave;
+    db.query('SELECT * FROM usuarios WHERE usuario = ? and clave=? ',[usuario,clave], (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      res.send(results);
+    });
+  });
 
+  
 app.listen(3001,()=>{
     console.log("Corriendo en el puerto 3001")
 })
