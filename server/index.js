@@ -36,8 +36,6 @@ const db = mysql.createConnection({
 
 
 app.get('/', (req, res) => {
-  console.log("");
-  console.log(req.session.email);
   if (req.session.email) {
     return res.json({ valid: true, email: req.session.email })
   } else {
@@ -67,6 +65,18 @@ app.post('/login', (req, res) => {
 
 app.get('/seleccionEstudiantes', (req, res) => {
   db.query('SELECT * FROM estudiantes WHERE id_docente = ? ', [req.session.idDocente], (err, results) => {
+    if (err) return res.json("Error");
+    if (results.length > 0) {
+      return res.json(results);
+    } else {
+      return res.json("No hay registro");
+    }
+  });
+});
+
+
+app.post('/seleccionEstudiantesFiltrados', (req, res) => {
+  db.query('select * from estudiantes where id_docente=? and nombre like ? and carrera like ?', [req.session.idDocente,req.body.nombre,req.body.carrera], (err, results) => {
     if (err) return res.json("Error");
     if (results.length > 0) {
       return res.json(results);
