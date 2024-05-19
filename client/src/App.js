@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 import Login from './login/login.jsx';
 import Home from './home/home.jsx';
+import Estudiante from "./home/paginaEstudiante.jsx";
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           <Route path='/' element={<Login />} />
           <Route path='/home' element={<Home />} />
+          <Route path="/paginaEstudiante" element={<Estudiante />} />
         </Routes>
       </Router>
 

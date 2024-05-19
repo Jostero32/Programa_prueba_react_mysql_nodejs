@@ -22,7 +22,7 @@ app.use(
     saveUninitialized: false,
     cookie:{
       secure: false,
-      maxAge: 1000 * 60 
+      maxAge: 1000 * 60 *60
     }
   })
 );
@@ -48,7 +48,6 @@ app.post('/login', (req, res) => {
     if (err) return res.json("Error");
     if (results.length > 0) {
       req.session.username = results[0].usuario;
-      req.session.password = results[0].clave;
       return res.json(results);
     } else {
       return res.json("No hay registro");
