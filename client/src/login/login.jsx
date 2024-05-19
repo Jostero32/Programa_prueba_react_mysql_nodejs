@@ -48,7 +48,7 @@ function Login() {
             <div className="input-login">
               <label htmlFor="email" className="label-login">Email</label><br />
               <input
-                type="text"
+                type="email"
                 placeholder="Ingresa tu Email"
                 onChange={(event) => setEmail(event.target.value)}
               />

@@ -1,13 +1,23 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import Axios from "axios";
 
 function Barranavegar() {
-    const navegar=useNavigate();
+  const navegar = useNavigate();
+  Axios.defaults.withCredentials = true;
+
+  const cerrarSesion=()=> {
+    Axios.get("http://localhost:3001/cerrarSesion").then((res) => {
+        navegar("/");
+
+    }).catch(err => console.log(err));
+  }
+
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
         <div className="container-fluid">
-          <a className="navbar-brand" onClick={()=>navegar("/home")}>
+          <a className="navbar-brand" onClick={() => navegar("/home")}>
             Inicio
           </a>
           <button
@@ -24,12 +34,16 @@ function Barranavegar() {
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav">
               <li className="nav-item">
-                <a className="nav-link" aria-current="page" onClick={()=>navegar("/paginaEstudiante")}>
+                <a
+                  className="nav-link"
+                  aria-current="page"
+                  onClick={() => navegar("/paginaEstudiante")}
+                >
                   Estudiantes
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#">
+                <a className="nav-link" onClick={cerrarSesion}>
                   Docente
                 </a>
               </li>
