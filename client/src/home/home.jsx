@@ -122,7 +122,7 @@ function Home() {
                     <td>{new Date(val.fecha_aprobacion).toLocaleDateString()}</td>
                     <td>{val.progreso}</td>
                     <td >
-                      <button className="button-81" role="button"  onClick={() => console.log(val.id)}>
+                      <button className="button-81" role="button"  onClick={() => navegar(`/paginaEstudiante?id_estudiante=${val.id}&id_docente=${val.id_docente}`)}>
                         Ver Informes
                       </button>
                     </td>
