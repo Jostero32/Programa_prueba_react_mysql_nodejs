@@ -3,6 +3,7 @@ import Axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./barranavegar.jsx";
+import "../home/home.css";
 
 function Home() {
   const [estudiantes, setEstudiantes] = useState([]);
@@ -24,9 +25,10 @@ function Home() {
     }
     Axios.post("http://localhost:3001/seleccionEstudiantesFiltrados", {
       nombre,
-      carrera})
+      carrera,
+    })
       .then((res) => {
-        if(res.data !== "No hay registro"){
+        if (res.data !== "No hay registro") {
           setEstudiantes(res.data);
         }
       })
@@ -52,72 +54,89 @@ function Home() {
     <>
       <Navbar />
 
-      <div className="container">
-        <div className="input-group">
-          <input
-            type="text"
-            className="form-control"
-            aria-describedby="inputGroupFileAddon04"
-            onChange={(event) => setValorBuscar(event.target.value)}
-          />
-          <button
-            className="btn btn-outline-secondary dropdown-toggle"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            {filtro}
-          </button>
-          <ul className="dropdown-menu dropdown-menu-end">
-            <li>
-              <a className="dropdown-item" onClick={() => setFiltro("Nombre")}>
-                Nombre
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item" onClick={() => setFiltro("Carrera")}>
-                Carrera
-              </a>
-            </li>
-          </ul>
-          <button
-            className="btn btn-outline-secondary"
-            type="button"
-            id="inputGroupFileAddon04"
-            onClick={buscarFiltro}
-          >
-            Buscar
-          </button>
+      <div className="paginaHome content">
+        <div className="titulo">
+        <h2>Estudiantes Tutorados</h2>
+        </div>
+        <div className="container barraBuscar">
+          <div className="input-group imputBuscar">
+            <input
+              type="text"
+              className="form-control"
+              aria-describedby="inputGroupFileAddon04"
+              onChange={(event) => setValorBuscar(event.target.value)}
+            />
+            <button
+              className="btn btn-outline-muted dropdown-toggle botonBuscar"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              {filtro}
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end">
+              <li>
+                <a
+                  className="dropdown-item"
+                  onClick={() => setFiltro("Nombre")}
+                >
+                  Nombre
+                </a>
+              </li>
+              <li>
+                <a
+                  className="dropdown-item"
+                  onClick={() => setFiltro("Carrera")}
+                >
+                  Carrera
+                </a>
+              </li>
+            </ul>
+            <button
+              className="btn btn-outline-muted botonBuscar"
+              type="button"
+              id="inputGroupFileAddon04"
+              onClick={buscarFiltro}
+            >
+              Buscar
+            </button>
+          </div>
+        </div>
+        <div className="container">
+          <table >
+            <thead>
+              <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Carrera</th>
+                <th scope="col">Fecha de Aprobación</th>
+                <th scope="col">Progreso</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {estudiantes.map((val, key) => {
+                return (
+                  <tr key={val.id}>
+                    <th scope="row">{val.nombre}</th>
+                    <td>{val.carrera}</td>
+                    <td>{new Date(val.fecha_aprobacion).toLocaleDateString()}</td>
+                    <td>{val.progreso}</td>
+                    <td >
+                      <button className="button-81" role="button"  onClick={() => console.log(val.id)}>
+                        Ver Informes
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
-      <div className="container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th scope="col">Nombre</th>
-              <th scope="col">Carrera</th>
-              <th scope="col">Progreso</th>
-              <th scope="col"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {estudiantes.map((val, key) => {
-              return (
-                <tr key={val.id}>
-                  <th scope="row">{val.nombre}</th>
-                  <td>{val.carrera}</td>
-                  <td>{val.progreso +"%"}</td>
-                  <td>
-                    <button onClick={() => navegar(`/paginaEstudiante?id_estudiante=${val.id}&id_docente=${val.id_docente}`)}>
-                      Ver Informes
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <hr />
+      <footer>
+        <p>2024 - UTA</p>
+      </footer>
     </>
   );
 }
