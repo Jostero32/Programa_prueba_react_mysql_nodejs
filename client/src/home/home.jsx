@@ -106,9 +106,9 @@ function Home() {
                 <tr key={val.id}>
                   <th scope="row">{val.nombre}</th>
                   <td>{val.carrera}</td>
-                  <td>{val.progreso}</td>
+                  <td>{val.progreso +"%"}</td>
                   <td>
-                    <button onClick={() => console.log(val.id)}>
+                    <button onClick={() => navegar(`/paginaEstudiante?id_estudiante=${val.id}&id_docente=${val.id_docente}`)}>
                       Ver Informes
                     </button>
                   </td>
