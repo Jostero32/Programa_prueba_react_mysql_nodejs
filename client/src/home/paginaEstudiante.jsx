@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useEffect } from "react";
 import Axios from 'axios';
 import { useNavigate } from "react-router-dom";
@@ -10,11 +10,31 @@ function PaginaUsuarios() {
   const navegar= useNavigate();
   Axios.defaults.withCredentials=true;
   const query=new URLSearchParams(useLocation().search);
+  const estudianteId=query.get('id_estudiante');
+  const docenteId=query.get('id_docente');
+  const [estudiante,setEstudiante]=useState([]);
 
   useEffect(() => {
     Axios.get("http://localhost:3001")
       .then((res) => {
         if (res.data.valid) {
+          Axios.post("http://localhost:3001/seleccionEstudianteInfo",{
+            idEstudiante:estudianteId,idDocente:docenteId
+          })
+            .then((res) => {
+              res.data.map((val, key) => {
+                setEstudiante({
+                  id: val.id,
+                  nombre: val.nombre,
+                  carrera:val.carrera,
+                  id_docente: val.id_docente,
+                  tema:val.tema,
+                  fechaAprobacion:new Date(val.fecha_aprobacion).toLocaleDateString()
+                })
+              })
+            })
+            .catch((err) => console.log(err));
+
         } else {
           navegar("/");
         }
@@ -30,13 +50,14 @@ function PaginaUsuarios() {
 <div className="card mb-3" >
   <div className="row g-0">
     <div className="col-md-4">
-      <img src="..." className="img-fluid rounded-start" alt="..." />
+      <img src="..." className="img-fluid rounded-start" alt="imagen del estudiante" />
     </div>
     <div className="col-md-8">
       <div className="card-body">
-        <h5 className="card-title">estudiante: {query.get('id_estudiante')}</h5>
-        <p className="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-        <p className="card-text"><small className="text-body-secondary">Last updated 3 mins ago</small></p>
+        <h4 className="card-title">{estudiante.nombre}</h4>
+        <h6>Carrera: {estudiante.carrera}</h6>
+        <p className="card-text">{estudiante.tema}</p>
+        <p className="card-text"><small className="text-body-secondary">Aprobado: {estudiante.fechaAprobacion}</small></p>
       </div>
     </div>
   </div>

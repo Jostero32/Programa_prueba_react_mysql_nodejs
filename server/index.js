@@ -86,6 +86,18 @@ app.post('/seleccionEstudiantesFiltrados', (req, res) => {
   });
 });
 
+
+app.post('/seleccionEstudianteInfo', (req, res) => {
+  db.query('SELECT * FROM estudiantes WHERE id_docente = ? and id=?', [req.body.idDocente,req.body.idEstudiante], (err, results) => {
+    if (err) return res.json("Error");
+    if (results.length > 0) {
+      return res.json(results);
+    } else {
+      return res.json("No hay registro");
+    }
+  });
+});
+
 app.listen(3001, () => {
   console.log("Corriendo en el puerto 3001")
 })
