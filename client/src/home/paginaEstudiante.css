@@ -1,0 +1,48 @@
+.card {
+    width: 100%;
+    height: 15em;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    border: 0cap;
+  }
+
+.info-estudiante{
+    padding: 10px;
+    text-align: justify;
+}
+
+.imagen{
+    padding-left: 25px;
+    height: 15em;
+}
+
+  .imagen img{
+    height: 100%;
+    width: auto;
+  }
+
+
+  .acciones {
+    display: flex;
+    justify-content: space-around;
+}
+
+.btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.btn img {
+    width: 24px; 
+    height: 24px;
+}
+
+.btn:hover img {
+    opacity: 0.8;
+}
+
+  
+
+  

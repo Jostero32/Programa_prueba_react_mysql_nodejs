@@ -56,7 +56,7 @@ function Home() {
 
       <div className="paginaHome content">
         <div className="titulo">
-        <h2>Estudiantes Tutorados</h2>
+          <h2>Estudiantes Tutorados</h2>
         </div>
         <div className="container barraBuscar">
           <div className="input-group imputBuscar">
@@ -122,13 +122,20 @@ function Home() {
                     <td>{new Date(val.fecha_aprobacion).toLocaleDateString()}</td>
                     <td>{val.progreso}</td>
                     <td >
-                      <button className="button-81" role="button"  onClick={() => navegar(`/paginaEstudiante?id_estudiante=${val.id}&id_docente=${val.id_docente}`)}>
+                      <button className="button-81" role="button" onClick={() => navegar(`/paginaEstudiante?id_estudiante=${val.id}&id_docente=${val.id_docente}`)}>
                         Ver Informes
                       </button>
                     </td>
                   </tr>
                 );
               })}
+              <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
             </tbody>
           </table>
         </div>

@@ -4,32 +4,34 @@ import Axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import Navbar from "./barranavegar.jsx";
 import { useLocation } from 'react-router-dom';
-
+import '../home/paginaEstudiante.css';
+import logo from '../home/logo-sitio-fisei-2020.png';
+import './home.css';
 
 function PaginaUsuarios() {
-  const navegar= useNavigate();
-  Axios.defaults.withCredentials=true;
-  const query=new URLSearchParams(useLocation().search);
-  const estudianteId=query.get('id_estudiante');
-  const docenteId=query.get('id_docente');
-  const [estudiante,setEstudiante]=useState([]);
+  const navegar = useNavigate();
+  Axios.defaults.withCredentials = true;
+  const query = new URLSearchParams(useLocation().search);
+  const estudianteId = query.get('id_estudiante');
+  const docenteId = query.get('id_docente');
+  const [estudiante, setEstudiante] = useState([]);
 
   useEffect(() => {
     Axios.get("http://localhost:3001")
       .then((res) => {
         if (res.data.valid) {
-          Axios.post("http://localhost:3001/seleccionEstudianteInfo",{
-            idEstudiante:estudianteId,idDocente:docenteId
+          Axios.post("http://localhost:3001/seleccionEstudianteInfo", {
+            idEstudiante: estudianteId, idDocente: docenteId
           })
             .then((res) => {
               res.data.map((val, key) => {
                 setEstudiante({
                   id: val.id,
                   nombre: val.nombre,
-                  carrera:val.carrera,
+                  carrera: val.carrera,
                   id_docente: val.id_docente,
-                  tema:val.tema,
-                  fechaAprobacion:new Date(val.fecha_aprobacion).toLocaleDateString()
+                  tema: val.tema,
+                  fechaAprobacion: new Date(val.fecha_aprobacion).toLocaleDateString()
                 })
               })
             })
@@ -40,48 +42,77 @@ function PaginaUsuarios() {
         }
       })
       .catch((err) => console.log(err))
-      
+
   }, []);
 
   return (
-<>
-<Navbar/>
-<div>
-<div className="card mb-3" >
-  <div className="row g-0">
-    <div className="col-md-4">
-      <img src="..." className="img-fluid rounded-start" alt="imagen del estudiante" />
-    </div>
-    <div className="col-md-8">
-      <div className="card-body">
-        <h4 className="card-title">{estudiante.nombre}</h4>
-        <h6>Carrera: {estudiante.carrera}</h6>
-        <p className="card-text">{estudiante.tema}</p>
-        <p className="card-text"><small className="text-body-secondary">Aprobado: {estudiante.fechaAprobacion}</small></p>
-      </div>
-    </div>
-  </div>
-</div>
-      <table className="table">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">1</th>
-            <td>Masdasdasdasdas</td>
-            <td>Oasdasdasdo</td>
-            <td>@asdasdasdasd</td>
-          </tr>
-
-        </tbody>
-      </table>
-    </div></>
+    <>
+      <Navbar />
+      <div className="container">
+        <div className="card mb-3 info-estudiante" >
+          <div className="row g-0">
+            <div className="col-md-3 imagen">
+              <img src={logo} className="img-fluid rounded-start" alt="imagen del estudiante" />
+            </div>
+            <div className="col-md">
+              <div className="card-body">
+                <br />
+                <h3 className="card-title">{estudiante.nombre}</h3>
+                <h6>Carrera: {estudiante.carrera}</h6>
+                <p className="card-text">{estudiante.tema}</p>
+                <p className="card-text"><small className="text-body-secondary">Aprobado: {estudiante.fechaAprobacion}</small></p>
+              </div>
+            </div>
+          </div>
+          <div className="row g-0 ">
+            <div className="col-md p-2">
+              <button>Agregar Informe</button>
+            </div>
+            <div className="col-md p-2">
+              <button>Generar Anexo 11</button>
+            </div>
+          </div>
+          <div className="row g-0 ">
+            <table >
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Informe</th>
+                  <th scope="col">Fecha de Informe</th>
+                  <th scope="col">Progreso</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>1</th>
+                  <td>Informe 1</td>
+                  <td>29/02/2024</td>
+                  <td>10%</td>
+                  <td className="acciones">
+                    <button class="btn eliminar">
+                      <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar" />
+                    </button>
+                    <button class="btn editar">
+                      <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Editar" />
+                    </button>
+                    <button class="btn hecho">
+                      <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="Marcar como Hecho" />
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div ></>
   );
 }
 

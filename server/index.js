@@ -28,7 +28,7 @@ app.use(
 );
 
 const db = mysql.createConnection({
-  host: "192.168.100.10",
+  host: "localhost",
   user: "pc_java",
   password: "1234",
   database: "tesisinformes"
