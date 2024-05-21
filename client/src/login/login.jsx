@@ -61,8 +61,8 @@ function Login() {
                 onChange={(event) => setClave(event.target.value)}
               />
             </div>
-            <div className="boton-iniciarsesion ">
-              <button className="btn btn-secondary">Iniciar Sesion</button>
+            <div className="imput-login">
+              <button className="btn1">Iniciar Sesion</button>
             </div>
           </form>
         </div>

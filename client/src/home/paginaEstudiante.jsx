@@ -59,17 +59,18 @@ function PaginaUsuarios() {
                 <br />
                 <h3 className="card-title">{estudiante.nombre}</h3>
                 <h6>Carrera: {estudiante.carrera}</h6>
-                <p className="card-text">{estudiante.tema}</p>
+                <p className="card-text">{'"'+estudiante.tema+'"'}</p>
                 <p className="card-text"><small className="text-body-secondary">Aprobado: {estudiante.fechaAprobacion}</small></p>
               </div>
             </div>
           </div>
           <div className="row g-0 ">
-            <div className="col-md p-2">
-              <button>Agregar Informe</button>
+            <div className="col-3"></div>
+            <div className="col-md pb-5">
+              <button className="boton" onClick={()=>navegar(`/paginaInforme?id_estudiante=${estudianteId}&id_docente=${docenteId}&modificar=${false}`)}>Agregar Informe</button>
             </div>
-            <div className="col-md p-2">
-              <button>Generar Anexo 11</button>
+            <div className="col-md pb-5">
+              <button className="boton">Generar Anexo 11</button>
             </div>
           </div>
           <div className="row g-0 ">
@@ -90,13 +91,13 @@ function PaginaUsuarios() {
                   <td>29/02/2024</td>
                   <td>10%</td>
                   <td className="acciones">
-                    <button class="btn eliminar">
+                    <button className="btn eliminar">
                       <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar" />
                     </button>
-                    <button class="btn editar">
+                    <button className="btn editar">
                       <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Editar" />
                     </button>
-                    <button class="btn hecho">
+                    <button className="btn hecho">
                       <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="Marcar como Hecho" />
                     </button>
                   </td>

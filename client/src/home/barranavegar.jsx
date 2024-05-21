@@ -17,10 +17,10 @@ function Barranavegar() {
   return (
     <div className="container-fluid px-0">
       <nav className="navbar navbar-expand-sm navbar-dark bg-uta py-0 px-0">
-        <a class="navbar-brand" onClick={()=>navegar("/home")} ><img id="logo" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYGTjkfPr57vwnw1rvZUMc9Q2MMRZHUrRJ3NfaFpDbcQ&s" /> &nbsp;&nbsp;&nbsp;UTA</a>
-        <span class="v-line"></span>
-        <button class="navbar-toggler mr-3" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+        <a className="navbar-brand" onClick={()=>navegar("/home")} ><img id="logo" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYGTjkfPr57vwnw1rvZUMc9Q2MMRZHUrRJ3NfaFpDbcQ&s" /> &nbsp;&nbsp;&nbsp;UTA</a>
+        <span className="v-line"></span>
+        <button className="navbar-toggler mr-3" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span className="navbar-toggler-icon"></span>
         </button>
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav ms-auto">
