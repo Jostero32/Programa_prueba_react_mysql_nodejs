@@ -39,12 +39,12 @@ function Barranavegar() {
                   aria-current="page"
                   onClick={() => navegar("/paginaEstudiante")}
                 >
-                  Estudiantes
+                              
                 </a>
               </li>
               <li className="nav-item">
                 <a className="nav-link" onClick={cerrarSesion}>
-                  Docente
+                  Salir Sesión
                 </a>
               </li>
             </ul>

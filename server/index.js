@@ -28,7 +28,7 @@ app.use(
 );
 
 const db = mysql.createConnection({
-  host: "192.168.100.10",
+  host: "localhost",
   user: "pc_java",
   password: "1234",
   database: "tesisinformes"
@@ -55,9 +55,9 @@ app.post('/login', (req, res) => {
     if (results.length > 0) {
       req.session.email = results[0].correo;
       req.session.idDocente = results[0].id;
-      return res.json(results);
+      return res.json({ valid: true});
     } else {
-      return res.json("No hay registro");
+      return res.json({ valid: false});
     }
   });
 });

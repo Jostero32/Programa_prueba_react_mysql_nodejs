@@ -120,7 +120,7 @@ function Home() {
                     <th scope="row">{val.nombre}</th>
                     <td>{val.carrera}</td>
                     <td>{new Date(val.fecha_aprobacion).toLocaleDateString()}</td>
-                    <td>{val.progreso}</td>
+                    <td>{val.progreso+"%"}</td>
                     <td >
                       <button className="button-81" role="button"  onClick={() => console.log(val.id)}>
                         Ver Informes
