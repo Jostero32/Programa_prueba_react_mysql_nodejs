@@ -7,6 +7,8 @@ import { useLocation } from 'react-router-dom';
 import '../home/paginaEstudiante.css';
 import logo from '../home/logo-sitio-fisei-2020.png';
 import './home.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function PaginaUsuarios() {
   const navegar = useNavigate();
@@ -15,6 +17,10 @@ function PaginaUsuarios() {
   const estudianteId = query.get('id_estudiante');
   const docenteId = query.get('id_docente');
   const [estudiante, setEstudiante] = useState([]);
+  const [informes, setInformes] = useState([]);
+  const [datosCargados, setDatosCargados] = useState(false);
+
+
 
   useEffect(() => {
     Axios.get("http://localhost:3001")
@@ -37,6 +43,18 @@ function PaginaUsuarios() {
             })
             .catch((err) => console.log(err));
 
+
+          Axios.post("http://localhost:3001/seleccionInformesEstudiante", {
+            idEstudiante: estudianteId
+          })
+            .then((res) => {
+              if (res.data !== "No hay registro") {
+                setInformes(res.data);
+              }
+              setDatosCargados(true);
+            })
+            .catch((err) => console.log(err));
+
         } else {
           navegar("/");
         }
@@ -44,6 +62,11 @@ function PaginaUsuarios() {
       .catch((err) => console.log(err))
 
   }, []);
+
+
+  if (!datosCargados) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -59,7 +82,7 @@ function PaginaUsuarios() {
                 <br />
                 <h3 className="card-title">{estudiante.nombre}</h3>
                 <h6>Carrera: {estudiante.carrera}</h6>
-                <p className="card-text">{'"'+estudiante.tema+'"'}</p>
+                <p className="card-text">{'"' + estudiante.tema + '"'}</p>
                 <p className="card-text"><small className="text-body-secondary">Aprobado: {estudiante.fechaAprobacion}</small></p>
               </div>
             </div>
@@ -67,7 +90,7 @@ function PaginaUsuarios() {
           <div className="row g-0 ">
             <div className="col-3"></div>
             <div className="col-md pb-5">
-              <button className="boton" onClick={()=>navegar(`/paginaInforme?id_estudiante=${estudianteId}&id_docente=${docenteId}&modificar=${false}`)}>Agregar Informe</button>
+              <button className="boton" onClick={() => navegar(`/paginaInforme?id_estudiante=${estudianteId}&id_docente=${docenteId}&modificar=${false}`)}>Agregar Informe</button>
             </div>
             <div className="col-md pb-5">
               <button className="boton">Generar Anexo 11</button>
@@ -85,23 +108,26 @@ function PaginaUsuarios() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <th>1</th>
-                  <td>Informe 1</td>
-                  <td>29/02/2024</td>
-                  <td>10%</td>
-                  <td className="acciones">
-                    <button className="btn eliminar">
-                      <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar" />
-                    </button>
-                    <button className="btn editar">
-                      <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Editar" />
-                    </button>
-                    <button className="btn hecho">
-                      <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="Marcar como Hecho" />
-                    </button>
-                  </td>
-                </tr>
+                {informes.map((informe, key) => (
+                  <tr key={key}>
+                    <th>{key + 1}</th>
+                    <td>Informe {key + 1}</td>
+                    <td>{new Date(informe.fecha_informe).toLocaleDateString()}</td>
+                    <td>{informe.progreso}%</td>
+                    <td className="acciones">
+                      <button className="btn eliminar">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar" />
+                      </button>
+                      <button className="btn editar">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Editar" />
+                      </button>
+                      <button className="btn hecho">
+                        <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="Marcar como Hecho" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+                }
                 <tr>
                   <th></th>
                   <th></th>
@@ -112,8 +138,12 @@ function PaginaUsuarios() {
               </tbody>
             </table>
           </div>
+
         </div>
-      </div ></>
+
+      </div >
+
+    </>
   );
 }
 

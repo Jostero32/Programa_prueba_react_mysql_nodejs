@@ -67,8 +67,7 @@ function Home() {
               onChange={(event) => setValorBuscar(event.target.value)}
             />
             <button
-              className="btn btn-outline-muted dropdown-toggle botonBuscar"
-              type="button"
+              type="button" className="btn btn-secondary"
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
@@ -93,8 +92,7 @@ function Home() {
               </li>
             </ul>
             <button
-              className="btn btn-outline-muted botonBuscar"
-              type="button"
+              type="button" className="btn btn-secondary"
               id="inputGroupFileAddon04"
               onClick={buscarFiltro}
             >
@@ -117,10 +115,10 @@ function Home() {
               {estudiantes.map((val, key) => {
                 return (
                   <tr key={val.id}>
-                    <th scope="row">{val.nombre}</th>
+                    <td scope="row"><b>{val.nombre}</b></td>
                     <td>{val.carrera}</td>
                     <td>{new Date(val.fecha_aprobacion).toLocaleDateString()}</td>
-                    <td>{val.progreso}</td>
+                    <td>{val.progreso+"%"}</td>
                     <td >
                       <button className="button-81" role="button" onClick={() => navegar(`/paginaEstudiante?id_estudiante=${val.id}&id_docente=${val.id_docente}`)}>
                         Ver Informes

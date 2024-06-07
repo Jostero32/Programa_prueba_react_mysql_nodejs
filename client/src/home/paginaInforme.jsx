@@ -4,6 +4,10 @@ import Axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import Navbar from "./barranavegar.jsx";
 import { useLocation } from 'react-router-dom';
+import '../home/home.css';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
 
 function PaginaUsuarios() {
   const navegar = useNavigate();
@@ -12,26 +16,76 @@ function PaginaUsuarios() {
   const estudianteId = query.get('id_estudiante');
   const docenteId = query.get('id_docente');
   const modificar = query.get('modificar') === 'true';
-  const [datosCargados, setDatosCargados] = useState(false); 
+  const alerta = withReactContent(Swal);
+  const [datosCargados, setDatosCargados] = useState(false);
   let informeId;
   if (modificar) {
     informeId = query.get('id_informe');
   }
+  const [progreso, setProgreso] = useState(0);
+  const [fechaInforme, setFechaInforme] = useState("");
   const [estudiante, setEstudiante] = useState([]);
   const [informe, setInforme] = useState([]);
   const [actividades, setActividades] = useState([]);
   const [tareaNueva, setTareaNueva] = useState('');
 
+  
+  const crearInforme = (event) => {
+    event.preventDefault();
+    Axios.post("http://localhost:3001/agregarInforme",
+      {
+        id_estudiante: estudiante.id,
+        fecha_informe: formatoFecha(fechaInforme),
+        progreso: progreso,
+        actividades: actividades
+      }).then((res) => {
+        if (res.data.valid) {
+          alerta.fire({
+            title: "Exito",
+            text: "Registro Exitoso",
+            icon: 'success',
+            confirmButtonText: "Aceptar"
+          });
+          navegar(`/paginaEstudiante?id_estudiante=${estudianteId}&id_docente=${docenteId}`);
+        }else{
+          alerta.fire({
+            title: "Error",
+            text: "No se realizo el registro",
+            icon: 'error',
+            confirmButtonText: "Aceptar"
+          });
+        }
+      }).catch((err) => {
+        alerta.fire({
+          title: "Error",
+          text: "No se realizo el registro",
+          icon: 'error',
+          confirmButtonText: "Aceptar"
+        });
+        console.error(err);
+      });
+  };
 
+
+  const formatoFecha = (dates) => {
+    const date = new Date(dates);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Meses de 0 a 11
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
   const agregarTarea = () => {
-    setActividades((actividades)=>[...actividades, {descripcion: tareaNueva}]);
-    setTareaNueva('');
-  }
+    let tareanueva = tareaNueva.trim();
+    if (tareanueva.length != 0) {
+      setActividades((actividades) => [...actividades, { descripcion: tareanueva }]);
+      setTareaNueva('');
+    }
+  };
 
-const eliminarTarea=(index)=>{
-  const filasmodificadas = actividades.filter((row, i) => i !== index);
-  setActividades(filasmodificadas);
-}
+  const eliminarTarea = (index) => {
+    const filasmodificadas = actividades.filter((row, i) => i !== index);
+    setActividades(filasmodificadas);
+  };
 
   useEffect(() => {
     Axios.get("http://localhost:3001")
@@ -83,11 +137,11 @@ const eliminarTarea=(index)=>{
   return (
     <>
       <Navbar />
-      <div className="container">
+      <div className="container-fluid">
         <div className="row">
-          <div className="col-5">
+          <div className="col-5 p-5">
             <div className="container">
-              <form onSubmit={() => console.log("hola")}>
+              <form onSubmit={(evt) => crearInforme(evt)}>
                 <div className="mb-3">
                   <label className="form-label">Nombre del Estudiante</label>
                   <input
@@ -129,6 +183,7 @@ const eliminarTarea=(index)=>{
                   <input
                     type="date"
                     className="form-control"
+                    onChange={(evt) => setFechaInforme(evt.target.value)}
                     required
                   />
                 </div>
@@ -138,25 +193,23 @@ const eliminarTarea=(index)=>{
                     type="number"
                     className="form-control"
                     name="progreso"
+                    onChange={(evt) => setProgreso(evt.target.value)}
                     required
                   />
                 </div>
-                <button>
-                  Enviar
-                </button>
-                
-              </form>
-              <h3>Actividades</h3>
+                <h3>Actividades</h3>
 
                 <input
                   type="text"
                   className="form-control"
                   value={tareaNueva}
-                  onChange={(event)=>setTareaNueva(event.target.value)}
-                  onSubmit={()=>agregarTarea()}
+                  onChange={(event) => setTareaNueva(event.target.value)}
+                  onSubmit={() => agregarTarea()}
                 />
-                <button type="button" onClick={()=>agregarTarea()}>agregar</button>
-                <table className="table table-bordered">
+                <div className="mb-3 mx-auto p-2 ">
+                  <button type="button" className="boton" onClick={() => agregarTarea()}>Agregar</button>
+                </div>
+                <table >
                   <thead>
                     <tr>
                       <th>Descripción</th>
@@ -164,18 +217,33 @@ const eliminarTarea=(index)=>{
                     </tr>
                   </thead>
                   <tbody>
-                    {actividades.map((actividad,key) => (
-                      <tr key={key}>
-                        <td>{actividad.descripcion}</td>
-                        <td>
-                          <button onClick={()=>eliminarTarea(key)}>
-                            Eliminar
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {actividades.length === 0 ?
+                      (
+                        <tr >
+                          <td></td>
+                          <td></td>
+                        </tr>
+                      ) : (actividades.map((actividad, key) => (
+                        <tr key={key}>
+                          <td>{actividad.descripcion}</td>
+                          <td>
+                            <button onClick={() => eliminarTarea(key)}>
+                              Eliminar
+                            </button>
+                          </td>
+                        </tr>
+                      )))
+                    }
+                    <tr>
+                      <th></th>
+                      <th></th>
+                    </tr>
                   </tbody>
                 </table>
+                <div className="p-3"><button type="submit" className="boton ">
+                  Enviar
+                </button></div>
+              </form>
             </div>
           </div>
           <div className="col">

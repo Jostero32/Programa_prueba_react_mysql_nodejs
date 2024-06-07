@@ -7,44 +7,12 @@
     padding-bottom: 100px;
 }
 
-.btn1 {
-    width: 8em;
-    height: 2em;
-    margin: 0.4em;
-    background: black;
-    color: white;
-    border: none;
-    border-radius: 0.5em;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    position: relative;
-    z-index: 1;
-    overflow: hidden;
-   }
-   
-   button:hover {
-    color: black;
-   }
-   
-   button:after {
-    content: "";
-    background: white;
-    position: absolute;
-    z-index: -1;
-    left: -20%;
-    right: -20%;
-    top: 0;
-    bottom: 0;
-    transform: skewX(-45deg) scale(0, 1);
-    transition: all 0.5s;
-   }
-   
-   button:hover:after {
-    transform: skewX(-45deg) scale(1, 1);
-    -webkit-transition: all 0.5s;
-    transition: all 0.5s;
-   }
+.boton-iniciarsesion {
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    color: #333;
+}
 
 .label-login {
     color: #333;
@@ -54,7 +22,6 @@
 }
 
 .form-login {
-    background-color: #ffffff;
     box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
     border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, .2);
@@ -62,7 +29,6 @@
 
 .input-login {
     text-align: center;
-    align-self: center;
     padding: 10px;
 }
 footer{
