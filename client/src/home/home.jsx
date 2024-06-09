@@ -118,7 +118,7 @@ function Home() {
           </div>
           <button
             type="button"
-            className="btn btn-primary"
+            className="button-81" // Aplicar la clase button-81 aquí
             onClick={() => navegar("/crearEstudiante")}
           >
             Crear Estudiante

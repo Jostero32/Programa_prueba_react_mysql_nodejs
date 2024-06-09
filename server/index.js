@@ -268,11 +268,15 @@ app.get('/carreras', (req, res) => {
     }
   });
 });
+
 app.post("/agregarEstudiante", (req, res) => {
   const { nombre, tema, fechaAprobacion, idCarrera } = req.body;
-  const progreso = 0; 
-  const query = "INSERT INTO estudiantes (nombre, tema, fecha_aprobacion, progreso, id_carrera) VALUES (?, ?, ?, ?, ?)";
-  db.query(query, [nombre, tema, fechaAprobacion, progreso, idCarrera], (err, result) => {
+  const progreso = 0;
+  const estado = "En Progreso";
+  const idDocente = req.session.idDocente;
+
+  const query = "INSERT INTO estudiantes (nombre, tema, fecha_aprobacion, progreso, estado, id_docente, id_carrera) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  db.query(query, [nombre, tema, fechaAprobacion, progreso, estado, idDocente, idCarrera], (err, result) => {
     if (err) {
       res.send({ valid: false });
     } else {
@@ -280,8 +284,6 @@ app.post("/agregarEstudiante", (req, res) => {
     }
   });
 });
-
-
 
 
 app.listen(3001, () => {
