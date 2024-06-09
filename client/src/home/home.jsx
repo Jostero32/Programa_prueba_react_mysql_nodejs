@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Axios from "axios";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./barranavegar.jsx";
 import "../home/home.css";
 
 function Home() {
   const [estudiantes, setEstudiantes] = useState([]);
+  const [carreras, setCarreras] = useState([]);
   const [filtro, setFiltro] = useState("Nombre");
+  const [carreraSeleccionada, setCarreraSeleccionada] = useState("");
   const navegar = useNavigate();
   const [valorBuscar, setValorBuscar] = useState("");
 
@@ -20,7 +21,7 @@ function Home() {
       nombre = valorBuscar.concat("%");
       carrera = "%";
     } else {
-      carrera = valorBuscar.concat("%");
+      carrera = carreraSeleccionada ? carreraSeleccionada.concat("%") : "%";
       nombre = "%";
     }
     Axios.post("http://localhost:3001/seleccionEstudiantesFiltrados", {
@@ -44,12 +45,18 @@ function Home() {
               setEstudiantes(res.data);
             })
             .catch((err) => console.log(err));
+          Axios.get("http://localhost:3001/carreras")
+            .then((res) => {
+              setCarreras(res.data);
+            })
+            .catch((err) => console.log(err));
         } else {
           navegar("/");
         }
       })
       .catch((err) => console.log(err));
   }, []);
+
   return (
     <>
       <Navbar />
@@ -65,9 +72,24 @@ function Home() {
               className="form-control"
               aria-describedby="inputGroupFileAddon04"
               onChange={(event) => setValorBuscar(event.target.value)}
+              style={{ display: filtro === "Nombre" ? "block" : "none" }}
             />
+            <select
+              className="form-control"
+              aria-describedby="inputGroupFileAddon04"
+              onChange={(event) => setCarreraSeleccionada(event.target.value)}
+              style={{ display: filtro === "Carrera" ? "block" : "none" }}
+            >
+              <option value="">Seleccione una carrera</option>
+              {carreras.map((carrera) => (
+                <option key={carrera.id} value={carrera.nombre}>
+                  {carrera.nombre}
+                </option>
+              ))}
+            </select>
             <button
-              type="button" className="btn btn-secondary"
+              type="button"
+              className="btn btn-secondary"
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
@@ -75,24 +97,19 @@ function Home() {
             </button>
             <ul className="dropdown-menu dropdown-menu-end">
               <li>
-                <a
-                  className="dropdown-item"
-                  onClick={() => setFiltro("Nombre")}
-                >
+                <a className="dropdown-item" onClick={() => setFiltro("Nombre")}>
                   Nombre
                 </a>
               </li>
               <li>
-                <a
-                  className="dropdown-item"
-                  onClick={() => setFiltro("Carrera")}
-                >
+                <a className="dropdown-item" onClick={() => setFiltro("Carrera")}>
                   Carrera
                 </a>
               </li>
             </ul>
             <button
-              type="button" className="btn btn-secondary"
+              type="button"
+              className="btn btn-secondary"
               id="inputGroupFileAddon04"
               onClick={buscarFiltro}
             >
@@ -101,7 +118,7 @@ function Home() {
           </div>
         </div>
         <div className="container">
-          <table >
+          <table>
             <thead>
               <tr>
                 <th scope="col">Nombre</th>
@@ -112,21 +129,27 @@ function Home() {
               </tr>
             </thead>
             <tbody>
-              {estudiantes.map((val, key) => {
-                return (
-                  <tr key={val.id}>
-                    <td scope="row"><b>{val.nombre}</b></td>
-                    <td>{val.carrera}</td>
-                    <td>{new Date(val.fecha_aprobacion).toLocaleDateString()}</td>
-                    <td>{val.progreso+"%"}</td>
-                    <td >
-                      <button className="button-81" role="button" onClick={() => navegar(`/paginaEstudiante?id_estudiante=${val.id}&id_docente=${val.id_docente}`)}>
-                        Ver Informes
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+              {estudiantes.map((val) => (
+                <tr key={val.id}>
+                  <td scope="row"><b>{val.nombre}</b></td>
+                  <td>{val.carrera}</td>
+                  <td>{new Date(val.fecha_aprobacion).toLocaleDateString()}</td>
+                  <td>{val.progreso + "%"}</td>
+                  <td>
+                    <button
+                      className="button-81"
+                      role="button"
+                      onClick={() =>
+                        navegar(
+                          `/paginaEstudiante?id_estudiante=${val.id}&id_docente=${val.id_docente}`
+                        )
+                      }
+                    >
+                      Ver Informes
+                    </button>
+                  </td>
+                </tr>
+              ))}
               <tr>
                 <th></th>
                 <th></th>
@@ -147,3 +170,4 @@ function Home() {
 }
 
 export default Home;
+

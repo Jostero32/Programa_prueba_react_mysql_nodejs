@@ -29,11 +29,10 @@ app.use(
 
 const db = mysql.createConnection({
   host: "localhost",
-  user: "pc_java",
-  password: "1234",
-  database: "tesisinformes"
+  user: "root",
+  password: "",
+  database: "agiles"
 });
-
 
 app.get('/', (req, res) => {
   if (req.session.email) {
@@ -46,7 +45,7 @@ app.get('/', (req, res) => {
 app.get('/cerrarSesion', (req, res) => {
   res.clearCookie('token');
   res.clearCookie('connect.sid');
-  return res.json({ Starus: "Success" })
+  return res.json({ Status: "Success" })
 })
 
 app.post('/login', (req, res) => {
@@ -68,9 +67,14 @@ app.post('/login', (req, res) => {
   });
 });
 
-
 app.get('/seleccionEstudiantes', (req, res) => {
-  db.query('SELECT * FROM estudiantes WHERE id_docente = ? ', [req.session.idDocente], (err, results) => {
+  const query = `
+    SELECT e.id, e.nombre, e.tema, e.fecha_aprobacion, e.progreso, e.estado, e.id_docente, c.nombre AS carrera 
+    FROM estudiantes e 
+    JOIN carreras c ON e.id_carrera = c.id 
+    WHERE e.id_docente = ?
+  `;
+  db.query(query, [req.session.idDocente], (err, results) => {
     if (err) return res.json("Error");
     if (results.length > 0) {
       return res.json(results);
@@ -79,10 +83,15 @@ app.get('/seleccionEstudiantes', (req, res) => {
     }
   });
 });
-
 
 app.post('/seleccionEstudiantesFiltrados', (req, res) => {
-  db.query('select * from estudiantes where id_docente=? and nombre like ? and carrera like ?', [req.session.idDocente, req.body.nombre, req.body.carrera], (err, results) => {
+  const query = `
+    SELECT e.id, e.nombre, e.tema, e.fecha_aprobacion, e.progreso, e.estado, e.id_docente, c.nombre AS carrera 
+    FROM estudiantes e 
+    JOIN carreras c ON e.id_carrera = c.id 
+    WHERE e.id_docente = ? AND e.nombre LIKE ? AND c.nombre LIKE ?
+  `;
+  db.query(query, [req.session.idDocente, `%${req.body.nombre}%`, `%${req.body.carrera}%`], (err, results) => {
     if (err) return res.json("Error");
     if (results.length > 0) {
       return res.json(results);
@@ -91,10 +100,15 @@ app.post('/seleccionEstudiantesFiltrados', (req, res) => {
     }
   });
 });
-
 
 app.post('/seleccionEstudianteInfo', (req, res) => {
-  db.query('SELECT * FROM estudiantes WHERE id_docente = ? and id=?', [req.body.idDocente, req.body.idEstudiante], (err, results) => {
+  const query = `
+    SELECT e.id, e.nombre, e.tema, e.fecha_aprobacion, e.progreso, e.estado, e.id_docente, c.nombre AS carrera 
+    FROM estudiantes e 
+    JOIN carreras c ON e.id_carrera = c.id 
+    WHERE e.id_docente = ? AND e.id = ?
+  `;
+  db.query(query, [req.body.idDocente, req.body.idEstudiante], (err, results) => {
     if (err) return res.json("Error");
     if (results.length > 0) {
       return res.json(results);
@@ -103,8 +117,9 @@ app.post('/seleccionEstudianteInfo', (req, res) => {
     }
   });
 });
+
 app.post('/seleccionInformesEstudiante', (req, res) => {
-  db.query('SELECT * FROM informes WHERE id_estudiante = ?', [ req.body.idEstudiante], (err, results) => {
+  db.query('SELECT * FROM informes WHERE id_estudiante = ?', [req.body.idEstudiante], (err, results) => {
     if (err) return res.json("Error");
     if (results.length > 0) {
       return res.json(results);
@@ -115,11 +130,10 @@ app.post('/seleccionInformesEstudiante', (req, res) => {
 });
 
 app.post('/agregarInforme', (req, res) => {
-
   db.beginTransaction((err) => {
     if (err) { return res.status(500).send({ error: 'Transaction error', details: err }); }
 
-    db.query('INSERT INTO informes (id_estudiante,  fecha_informe, progreso) VALUES (?, ?, ?)', [req.body.id_estudiante, req.body.fecha_informe, req.body.progreso], (err, result) => {
+    db.query('INSERT INTO informes (id_estudiante, fecha_informe, progreso) VALUES (?, ?, ?)', [req.body.id_estudiante, req.body.fecha_informe, req.body.progreso], (err, result) => {
       if (err) {
         return db.rollback(() => {
           res.status(500).send({ error: 'Error al insertar informe', details: err });
@@ -131,7 +145,7 @@ app.post('/agregarInforme', (req, res) => {
       const actividadesValues = req.body.actividades.map(act => [informeId, act.descripcion]);
       const queryActividades = `INSERT INTO actividades (id_informe, descripcion) VALUES ?`;
 
-      if (actividadesValues.length>0) {
+      if (actividadesValues.length > 0) {
         db.query(queryActividades, [actividadesValues], (err, result) => {
           if (err) {
             return db.rollback(() => {
@@ -145,15 +159,24 @@ app.post('/agregarInforme', (req, res) => {
                 res.status(500).send({ error: 'Transaction commit error', details: err });
               });
             }
-            return res.json({ valid: true});
+            return res.json({ valid: true });
           });
+        });
+      } else {
+        db.commit((err) => {
+          if (err) {
+            return db.rollback(() => {
+              res.status(500).send({ error: 'Transaction commit error', details: err });
+            });
+          }
+          return res.json({ valid: true });
         });
       }
     });
   });
 });
 
-app.put('/actulizarInforme/:id', (req, res) => {
+app.put('/actualizarInforme/:id', (req, res) => {
   const { id } = req.params;
   const { numero_informe, fecha_informe, progreso, actividades } = req.body;
 
@@ -192,7 +215,7 @@ app.put('/actulizarInforme/:id', (req, res) => {
                 res.status(500).send({ error: 'Transaction commit error', details: err });
               });
             }
-            res.status(200).send({ message: 'Informe y actividades actualizados exitosamente',valid:true });
+            res.status(200).send({ message: 'Informe y actividades actualizados exitosamente', valid: true });
           });
         });
       });
@@ -235,6 +258,18 @@ app.delete('/borrarInforme/:id', (req, res) => {
   });
 });
 
+app.get('/carreras', (req, res) => {
+  db.query('SELECT * FROM carreras', (err, results) => {
+    if (err) return res.json("Error");
+    if (results.length > 0) {
+      return res.json(results);
+    } else {
+      return res.json("No hay registro");
+    }
+  });
+});
+
+
 app.listen(3001, () => {
   console.log("Corriendo en el puerto 3001")
-})
+});
