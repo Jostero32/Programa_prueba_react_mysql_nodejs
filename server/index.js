@@ -268,6 +268,20 @@ app.get('/carreras', (req, res) => {
     }
   });
 });
+app.post("/agregarEstudiante", (req, res) => {
+  const { nombre, tema, fechaAprobacion, idCarrera } = req.body;
+  const progreso = 0; 
+  const query = "INSERT INTO estudiantes (nombre, tema, fecha_aprobacion, progreso, id_carrera) VALUES (?, ?, ?, ?, ?)";
+  db.query(query, [nombre, tema, fechaAprobacion, progreso, idCarrera], (err, result) => {
+    if (err) {
+      res.send({ valid: false });
+    } else {
+      res.send({ valid: true });
+    }
+  });
+});
+
+
 
 
 app.listen(3001, () => {

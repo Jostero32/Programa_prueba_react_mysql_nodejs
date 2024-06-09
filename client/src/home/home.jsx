@@ -116,6 +116,13 @@ function Home() {
               Buscar
             </button>
           </div>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => navegar("/crearEstudiante")}
+          >
+            Crear Estudiante
+          </button>
         </div>
         <div className="container">
           <table>
@@ -170,4 +177,3 @@ function Home() {
 }
 
 export default Home;
-
