@@ -42,12 +42,16 @@ function Home() {
         if (res.data.valid) {
           Axios.get("http://localhost:3001/seleccionEstudiantes")
             .then((res) => {
-              setEstudiantes(res.data);
+              if (res.data !== "No hay registro") {
+                setEstudiantes(res.data);
+              }
             })
             .catch((err) => console.log(err));
           Axios.get("http://localhost:3001/carreras")
             .then((res) => {
-              setCarreras(res.data);
+              if (res.data !== "No hay registro") {
+                setCarreras(res.data);
+              }
             })
             .catch((err) => console.log(err));
         } else {
@@ -61,7 +65,7 @@ function Home() {
     <>
       <Navbar />
 
-      <div className="paginaHome content">
+      <div className="paginaHome ">
         <div className="titulo">
           <h2>Estudiantes Tutorados</h2>
         </div>
@@ -75,7 +79,7 @@ function Home() {
               style={{ display: filtro === "Nombre" ? "block" : "none" }}
             />
             <select
-              className="form-control"
+              className="form-control "
               aria-describedby="inputGroupFileAddon04"
               onChange={(event) => setCarreraSeleccionada(event.target.value)}
               style={{ display: filtro === "Carrera" ? "block" : "none" }}
@@ -118,7 +122,7 @@ function Home() {
           </div>
           <button
             type="button"
-            className="button-81" // Aplicar la clase button-81 aquí
+            className="button-81" 
             onClick={() => navegar("/crearEstudiante")}
           >
             Crear Estudiante
@@ -156,7 +160,8 @@ function Home() {
                     </button>
                   </td>
                 </tr>
-              ))}
+              ))
+              }
               <tr>
                 <th></th>
                 <th></th>

@@ -1,15 +1,15 @@
 .paginaHome{
  background-color: rgb(233, 233, 233);   
- height: 500px;
+ height: 700px;
 }
 
 .barraBuscar{
     padding-bottom: 10px;
+    border-radius: 8px;
 }
 
 .imputBuscar{
     background-color: #9a122b;
-
     border-radius: 8px;
     color: rgb(255, 255, 255);
 }

@@ -22,59 +22,96 @@ function PaginaUsuarios() {
   if (modificar) {
     informeId = query.get('id_informe');
   }
+  const formatoFecha = (dates) => {
+    const date = (dates === undefined) ? new Date() : new Date(dates);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const [progreso, setProgreso] = useState(0);
-  const [fechaInforme, setFechaInforme] = useState("");
+  const [fechaInforme, setFechaInforme] = useState(formatoFecha());
   const [estudiante, setEstudiante] = useState([]);
-  const [informe, setInforme] = useState([]);
   const [actividades, setActividades] = useState([]);
   const [tareaNueva, setTareaNueva] = useState('');
 
-  
+
   const crearInforme = (event) => {
     event.preventDefault();
-    Axios.post("http://localhost:3001/agregarInforme",
-      {
-        id_estudiante: estudiante.id,
-        fecha_informe: formatoFecha(fechaInforme),
-        progreso: progreso,
-        actividades: actividades
-      }).then((res) => {
-        if (res.data.valid) {
-          alerta.fire({
-            title: "Exito",
-            text: "Registro Exitoso",
-            icon: 'success',
-            confirmButtonText: "Aceptar"
-          });
-          navegar(`/paginaEstudiante?id_estudiante=${estudianteId}&id_docente=${docenteId}`);
-        }else{
-          alerta.fire({
-            title: "Error",
-            text: "No se realizo el registro",
-            icon: 'error',
-            confirmButtonText: "Aceptar"
-          });
-        }
-      }).catch((err) => {
+if(modificar){
+  Axios.post("http://localhost:3001/actualizarInforme",
+    {
+      id:informeId,
+      id_estudiante: estudiante.id,
+      fecha_informe: formatoFecha(fechaInforme),
+      progreso: progreso,
+      actividades: actividades
+    }).then((res) => {
+      if (res.data.valid) {
+        alerta.fire({
+          title: "Exito",
+          text: "Se modificó la información",
+          icon: 'success',
+          confirmButtonText: "Aceptar"
+        });
+        navegar(`/paginaEstudiante?id_estudiante=${estudianteId}&id_docente=${docenteId}`);
+      } else {
         alerta.fire({
           title: "Error",
           text: "No se realizo el registro",
           icon: 'error',
           confirmButtonText: "Aceptar"
         });
-        console.error(err);
+      }
+    }).catch((err) => {
+      alerta.fire({
+        title: "Error",
+        text: err,
+        icon: 'error',
+        confirmButtonText: "Aceptar"
       });
+      console.error(err);
+    });
+}else{
+  Axios.post("http://localhost:3001/agregarInforme",
+    {
+      id_estudiante: estudiante.id,
+      fecha_informe: formatoFecha(fechaInforme),
+      progreso: progreso,
+      actividades: actividades
+    }).then((res) => {
+      if (res.data.valid) {
+        alerta.fire({
+          title: "Exito",
+          text: "Registro Exitoso",
+          icon: 'success',
+          confirmButtonText: "Aceptar"
+        });
+        navegar(`/paginaEstudiante?id_estudiante=${estudianteId}&id_docente=${docenteId}`);
+      } else {
+        alerta.fire({
+          title: "Error",
+          text: "No se realizo el registro",
+          icon: 'error',
+          confirmButtonText: "Aceptar"
+        });
+      }
+    }).catch((err) => {
+      alerta.fire({
+        title: "Error",
+        text: err,
+        icon: 'error',
+        confirmButtonText: "Aceptar"
+      });
+      console.error(err);
+    });
+}
   };
 
 
-  const formatoFecha = (dates) => {
-    const date = new Date(dates);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Meses de 0 a 11
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-  const agregarTarea = () => {
+  const agregarTarea = (event) => {
+    event.preventDefault();
     let tareanueva = tareaNueva.trim();
     if (tareanueva.length != 0) {
       setActividades((actividades) => [...actividades, { descripcion: tareanueva }]);
@@ -82,7 +119,8 @@ function PaginaUsuarios() {
     }
   };
 
-  const eliminarTarea = (index) => {
+  const eliminarTarea = (index,event) => {
+    event.preventDefault();
     const filasmodificadas = actividades.filter((row, i) => i !== index);
     setActividades(filasmodificadas);
   };
@@ -113,10 +151,16 @@ function PaginaUsuarios() {
               idEstudiante: estudianteId, idInforme: informeId
             })
               .then((res) => {
-                res.data.map((val, key) => {
-                  setInforme({
-
+                if (res.data !== "No hay registro") {
+                  res.data.map((val, key) => {
+                    setFechaInforme(formatoFecha(val.fecha_informe));
+                    setProgreso(val.progreso);
                   })
+                }
+                Axios.post("http://localhost:3001/seleccionActividadesInforme", { idInforme: informeId }).then((res) => {
+                  if (res.data !== "No hay registro") {
+                    setActividades(res.data);
+                  }
                 })
               })
               .catch((err) => console.log(err));
@@ -183,6 +227,7 @@ function PaginaUsuarios() {
                   <input
                     type="date"
                     className="form-control"
+                    value={fechaInforme}
                     onChange={(evt) => setFechaInforme(evt.target.value)}
                     required
                   />
@@ -191,6 +236,9 @@ function PaginaUsuarios() {
                   <label className="form-label">Progreso</label>
                   <input
                     type="number"
+                    max={100}
+                    min={0}
+                    value={progreso}
                     className="form-control"
                     name="progreso"
                     onChange={(evt) => setProgreso(evt.target.value)}
@@ -204,10 +252,10 @@ function PaginaUsuarios() {
                   className="form-control"
                   value={tareaNueva}
                   onChange={(event) => setTareaNueva(event.target.value)}
-                  onSubmit={() => agregarTarea()}
+                  onSubmit={(evt) => agregarTarea(evt)}
                 />
                 <div className="mb-3 mx-auto p-2 ">
-                  <button type="button" className="boton" onClick={() => agregarTarea()}>Agregar</button>
+                  <button type="button" className="boton" onClick={(evt) => agregarTarea(evt)}>Agregar</button>
                 </div>
                 <table >
                   <thead>
@@ -227,7 +275,7 @@ function PaginaUsuarios() {
                         <tr key={key}>
                           <td>{actividad.descripcion}</td>
                           <td>
-                            <button onClick={() => eliminarTarea(key)}>
+                            <button onClick={(evt) => eliminarTarea(key,evt)}>
                               Eliminar
                             </button>
                           </td>
@@ -240,9 +288,14 @@ function PaginaUsuarios() {
                     </tr>
                   </tbody>
                 </table>
-                <div className="p-3"><button type="submit" className="boton ">
-                  Enviar
-                </button></div>
+                <div className="row p-3">
+                  <div className="col-9"><button type="submit" className="boton ">
+                    Enviar
+                  </button></div>
+                  <div className="col-2"><button type="button" className="boton " onClick={()=>(navegar(`/paginaEstudiante?id_estudiante=${estudianteId}&id_docente=${docenteId}`))}>
+                    Cancelar
+                  </button></div>
+                </div>
               </form>
             </div>
           </div>

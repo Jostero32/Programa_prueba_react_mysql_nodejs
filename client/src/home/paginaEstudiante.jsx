@@ -8,11 +8,13 @@ import '../home/paginaEstudiante.css';
 import logo from '../home/logo-sitio-fisei-2020.png';
 import './home.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
 function PaginaUsuarios() {
   const navegar = useNavigate();
   Axios.defaults.withCredentials = true;
+  const alerta = withReactContent(Swal);
   const query = new URLSearchParams(useLocation().search);
   const estudianteId = query.get('id_estudiante');
   const docenteId = query.get('id_docente');
@@ -20,7 +22,40 @@ function PaginaUsuarios() {
   const [informes, setInformes] = useState([]);
   const [datosCargados, setDatosCargados] = useState(false);
 
+  const borrarInforme = (informeId) => {
+    Axios.delete('http://localhost:3001/borrarInforme', {
+      data: { id: informeId,id_estudiante:estudianteId }
+    })
+      .then((response) => {
+        if (response.data.valid) {
+          alerta.fire({
+            title: '¡Eliminado!',
+            text: 'El informe y sus actividades han sido eliminados exitosamente.',
+            icon: 'success',
+            confirmButtonText: 'Aceptar'
+          }).then(()=>{
+            window.location.reload();
+          })
+          
+        } else {
+          alerta.fire({
+            title: 'Error',
+            text: 'Hubo un error al eliminar el informe y sus actividades.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+          });
+        }
+      })
+      .catch(error => {
+        alerta.fire({
+          title: 'Error',
+          text: `Hubo un error: ${error.message}`,
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+      });
 
+  }
 
   useEffect(() => {
     Axios.get("http://localhost:3001")
@@ -48,7 +83,7 @@ function PaginaUsuarios() {
             idEstudiante: estudianteId
           })
             .then((res) => {
-              if (res.data !== "No hay registro") {
+              if (res.data !== "No hay registro" && res.data !== "Error") {
                 setInformes(res.data);
               }
               setDatosCargados(true);
@@ -109,16 +144,16 @@ function PaginaUsuarios() {
               </thead>
               <tbody>
                 {informes.map((informe, key) => (
-                  <tr key={key}>
+                  <tr key={informe.id}>
                     <th>{key + 1}</th>
                     <td>Informe {key + 1}</td>
                     <td>{new Date(informe.fecha_informe).toLocaleDateString()}</td>
                     <td>{informe.progreso}%</td>
                     <td className="acciones">
-                      <button className="btn eliminar">
+                      <button className="btn eliminar" onClick={() => borrarInforme(informe.id)}>
                         <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar" />
                       </button>
-                      <button className="btn editar">
+                      <button className="btn editar" onClick={() => navegar(`/paginaInforme?id_estudiante=${estudianteId}&id_docente=${docenteId}&modificar=${true}&id_informe=${informe.id}`)}>
                         <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Editar" />
                       </button>
                       <button className="btn hecho">

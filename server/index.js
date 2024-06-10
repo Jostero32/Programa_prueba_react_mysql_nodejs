@@ -9,7 +9,7 @@ const bcrypt = require('bcrypt');
 
 app.use(cors({
   origin: ["http://localhost:3000"],
-  methods: ["POST", "GET"],
+  methods: ["POST", "GET","DELETE"],
   credentials: true
 }));
 app.use(express.json());
@@ -29,8 +29,8 @@ app.use(
 
 const db = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "yPaqryDz24",
+  user: "pc_java",
+  password: "1234",
   database: "tesisinformes"
 });
 
@@ -119,7 +119,27 @@ app.post('/seleccionEstudianteInfo', (req, res) => {
 });
 
 app.post('/seleccionInformesEstudiante', (req, res) => {
-  db.query('SELECT * FROM informes WHERE id_estudiante = ?', [req.body.idEstudiante], (err, results) => {
+  db.query('SELECT * FROM informes WHERE id_estudiante = ?  order by progreso', [req.body.idEstudiante], (err, results) => {
+    if (err) return res.json("Error");
+    if (results.length > 0) {
+      return res.json(results);
+    } else {
+      return res.json("No hay registro");
+    }
+  });
+});
+app.post('/seleccionInforme', (req, res) => {
+  db.query('SELECT * FROM informes WHERE id=?', [req.body.idInforme], (err, results) => {
+    if (err) return res.json("Error");
+    if (results.length > 0) {
+      return res.json(results);
+    } else {
+      return res.json("No hay registro");
+    }
+  });
+});
+app.post('/seleccionActividadesInforme', (req, res) => {
+  db.query('SELECT * FROM actividades WHERE id_informe = ? ', [req.body.idInforme], (err, results) => {
     if (err) return res.json("Error");
     if (results.length > 0) {
       return res.json(results);
@@ -131,7 +151,9 @@ app.post('/seleccionInformesEstudiante', (req, res) => {
 
 app.post('/agregarInforme', (req, res) => {
   db.beginTransaction((err) => {
-    if (err) { return res.status(500).send({ error: 'Transaction error', details: err }); }
+    if (err) {
+      return res.status(500).send({ error: 'Transaction error', details: err });
+    }
 
     db.query('INSERT INTO informes (id_estudiante, fecha_informe, progreso) VALUES (?, ?, ?)', [req.body.id_estudiante, req.body.fecha_informe, req.body.progreso], (err, result) => {
       if (err) {
@@ -139,20 +161,36 @@ app.post('/agregarInforme', (req, res) => {
           res.status(500).send({ error: 'Error al insertar informe', details: err });
         });
       }
-
       const informeId = result.insertId;
 
-      const actividadesValues = req.body.actividades.map(act => [informeId, act.descripcion]);
-      const queryActividades = `INSERT INTO actividades (id_informe, descripcion) VALUES ?`;
+      db.query('UPDATE estudiantes SET progreso = (SELECT MAX(progreso) FROM informes WHERE id_estudiante= ? ) WHERE id= ?', [req.body.id_estudiante, req.body.id_estudiante], (err, result) => {
+        if (err) {
+          return db.rollback(() => {
+            res.status(500).send({ error: 'Error al actualizar progreso', details: err });
+          });
+        }
 
-      if (actividadesValues.length > 0) {
-        db.query(queryActividades, [actividadesValues], (err, result) => {
-          if (err) {
-            return db.rollback(() => {
-              res.status(500).send({ error: 'Error al insertar actividades', details: err });
+        const actividadesValues = req.body.actividades.map(act => [informeId, act.descripcion]);
+        const queryActividades = `INSERT INTO actividades (id_informe, descripcion) VALUES ?`;
+
+        if (actividadesValues.length > 0) {
+          db.query(queryActividades, [actividadesValues], (err, result) => {
+            if (err) {
+              return db.rollback(() => {
+                res.status(500).send({ error: 'Error al insertar actividades', details: err });
+              });
+            }
+
+            db.commit((err) => {
+              if (err) {
+                return db.rollback(() => {
+                  res.status(500).send({ error: 'Transaction commit error', details: err });
+                });
+              }
+              return res.json({ valid: true });
             });
-          }
-
+          });
+        } else {
           db.commit((err) => {
             if (err) {
               return db.rollback(() => {
@@ -161,73 +199,88 @@ app.post('/agregarInforme', (req, res) => {
             }
             return res.json({ valid: true });
           });
-        });
-      } else {
-        db.commit((err) => {
-          if (err) {
-            return db.rollback(() => {
-              res.status(500).send({ error: 'Transaction commit error', details: err });
-            });
-          }
-          return res.json({ valid: true });
-        });
-      }
+        }
+      });
     });
   });
 });
 
-app.put('/actualizarInforme/:id', (req, res) => {
-  const { id } = req.params;
-  const { numero_informe, fecha_informe, progreso, actividades } = req.body;
 
+app.post('/actualizarInforme', (req, res) => {
   db.beginTransaction((err) => {
-    if (err) { return res.status(500).send({ error: 'Transaction error', details: err }); }
+    if (err) {
+      return res.status(500).send({ error: 'Transaction error', details: err });
+    }
 
-    const queryUpdateInforme = `UPDATE informes SET numero_informe = ?, fecha_informe = ?, progreso = ? WHERE id = ?`;
-    db.query(queryUpdateInforme, [numero_informe, fecha_informe, progreso, id], (err, result) => {
+    const queryUpdateInforme = `UPDATE informes SET fecha_informe = ?, progreso = ? WHERE id = ?`;
+    db.query(queryUpdateInforme, [req.body.fecha_informe, req.body.progreso, req.body.id], (err, result) => {
       if (err) {
         return db.rollback(() => {
           res.status(500).send({ error: 'Error al actualizar informe', details: err });
         });
       }
 
-      const queryDeleteActividades = `DELETE FROM actividades WHERE id_informe = ?`;
-      db.query(queryDeleteActividades, [id], (err, result) => {
+      db.query('UPDATE estudiantes SET progreso = (SELECT MAX(progreso) FROM informes WHERE id_estudiante= ? ) WHERE id= ?', [req.body.id_estudiante, req.body.id_estudiante], (err, result) => {
         if (err) {
           return db.rollback(() => {
-            res.status(500).send({ error: 'Error al eliminar actividades', details: err });
+            res.status(500).send({ error: 'Error al actualizar progreso', details: err });
           });
         }
 
-        const actividadesValues = actividades.map(act => [id, act.descripcion]);
-        const queryInsertActividades = `INSERT INTO actividades (id_informe, descripcion) VALUES ?`;
-
-        db.query(queryInsertActividades, [actividadesValues], (err, result) => {
+        const queryDeleteActividades = `DELETE FROM actividades WHERE id_informe = ?`;
+        db.query(queryDeleteActividades, [req.body.id], (err, result) => {
           if (err) {
             return db.rollback(() => {
-              res.status(500).send({ error: 'Error al insertar actividades', details: err });
+              res.status(500).send({ error: 'Error al eliminar actividades', details: err });
             });
           }
 
-          db.commit((err) => {
-            if (err) {
-              return db.rollback(() => {
-                res.status(500).send({ error: 'Transaction commit error', details: err });
+          const actividadesValues = req.body.actividades.map(act => [req.body.id, act.descripcion]);
+
+          if (actividadesValues.length > 0) {
+            const queryInsertActividades = `INSERT INTO actividades (id_informe, descripcion) VALUES ?`;
+            db.query(queryInsertActividades, [actividadesValues], (err, result) => {
+              if (err) {
+                return db.rollback(() => {
+                  res.status(500).send({ error: 'Error al insertar actividades', details: err });
+                });
+              }
+
+              db.commit((err) => {
+                if (err) {
+                  return db.rollback(() => {
+                    res.status(500).send({ error: 'Transaction commit error', details: err });
+                  });
+                }
+                res.status(200).send({ message: 'Informe y actividades actualizados exitosamente', valid: true });
               });
-            }
-            res.status(200).send({ message: 'Informe y actividades actualizados exitosamente', valid: true });
-          });
+            });
+          } else {
+            db.commit((err) => {
+              if (err) {
+                return db.rollback(() => {
+                  res.status(500).send({ error: 'Transaction commit error', details: err });
+                });
+              }
+              res.status(200).send({ message: 'Informe actualizado exitosamente, sin nuevas actividades', valid: true });
+            });
+          }
         });
       });
     });
   });
 });
 
-app.delete('/borrarInforme/:id', (req, res) => {
-  const { id } = req.params;
+
+
+
+app.delete('/borrarInforme', (req, res) => {
+  const { id, id_estudiante } = req.body;
 
   db.beginTransaction((err) => {
-    if (err) { return res.status(500).send({ error: 'Transaction error', details: err }); }
+    if (err) {
+      return res.status(500).send({ error: 'Transaction error', details: err });
+    }
 
     const queryDeleteActividades = `DELETE FROM actividades WHERE id_informe = ?`;
     db.query(queryDeleteActividades, [id], (err, result) => {
@@ -245,18 +298,28 @@ app.delete('/borrarInforme/:id', (req, res) => {
           });
         }
 
-        db.commit((err) => {
+        const queryUpdateProgreso = `UPDATE estudiantes SET progreso = (SELECT IFNULL(MAX(progreso), 0) FROM informes WHERE id_estudiante = ?) WHERE id = ?`;
+        db.query(queryUpdateProgreso, [id_estudiante, id_estudiante], (err, result) => {
           if (err) {
             return db.rollback(() => {
-              res.status(500).send({ error: 'Transaction commit error', details: err });
+              res.status(500).send({ error: 'Error al actualizar progreso', details: err });
             });
           }
-          res.status(200).send({ message: 'Informe y actividades eliminados exitosamente' });
+
+          db.commit((err) => {
+            if (err) {
+              return db.rollback(() => {
+                res.status(500).send({ error: 'Transaction commit error', details: err });
+              });
+            }
+            res.status(200).send({ message: 'Informe, actividades eliminados y progreso actualizado exitosamente', valid: true });
+          });
         });
       });
     });
   });
 });
+
 
 app.get('/carreras', (req, res) => {
   db.query('SELECT * FROM carreras', (err, results) => {

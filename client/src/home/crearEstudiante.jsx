@@ -61,7 +61,7 @@ function CrearEstudiante() {
   return (
     <>
       <Navbar />
-      <div className="paginaCrearEstudiante content">
+      <div className="paginaCrearEstudiante container p-3">
         <h2>Crear Estudiante</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
