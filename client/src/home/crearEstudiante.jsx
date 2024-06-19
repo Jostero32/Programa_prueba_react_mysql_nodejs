@@ -3,6 +3,8 @@ import Axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./barranavegar.jsx";
 import "./CrearEstudiante.css"; 
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 
 function CrearEstudiante() {
   const [nombre, setNombre] = useState("");
@@ -10,10 +12,9 @@ function CrearEstudiante() {
   const [fechaAprobacion, setFechaAprobacion] = useState("");
   const [carreras, setCarreras] = useState([]);
   const [idCarrera, setIdCarrera] = useState("");
-  const [mensaje, setMensaje] = useState("");
-  const [showModal, setShowModal] = useState(false);
   const navegar = useNavigate();
-
+  const alerta = withReactContent(Swal);
+  
   Axios.defaults.withCredentials = true;
 
   useEffect(() => {
@@ -26,10 +27,6 @@ function CrearEstudiante() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!nombre || !tema || !fechaAprobacion || !idCarrera) {
-      setMensaje("Por favor, complete todos los campos.");
-      return;
-    }
     Axios.post("http://localhost:3001/agregarEstudiante", {
       nombre,
       tema,
@@ -38,18 +35,29 @@ function CrearEstudiante() {
     })
       .then((res) => {
         if (res.data.valid) {
-          setMensaje("Estudiante creado exitosamente");
-          setShowModal(true);
-          setTimeout(() => {
-            setShowModal(false);
+          alerta.fire({
+            title: "Exito",
+            text: "Se ha Registrado un estudiante.",
+            icon: 'success',
+            confirmButtonText: "Aceptar"
+          });
             navegar("/home");
-          }, 2000);
         } else {
-          setMensaje("Error al crear el estudiante");
+          alerta.fire({
+            title: "Error",
+            text: "No se ha podido crear el Estudiante",
+            icon: 'error',
+            confirmButtonText: "Aceptar"
+          });
         }
       })
       .catch((err) => {
-        setMensaje("Error al crear el estudiante");
+        alerta.fire({
+          title: "Error",
+          text: err,
+          icon: 'error',
+          confirmButtonText: "Aceptar"
+        });
         console.log(err);
       });
   };
@@ -119,17 +127,6 @@ function CrearEstudiante() {
             </button>
           </div>
         </form>
-        {mensaje && <p>{mensaje}</p>}
-
-        {showModal && (
-          <div className="modal">
-            <div className="modal-content">
-              <button className="btn boton" onClick={() => setShowModal(false)}>
-                OK
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );

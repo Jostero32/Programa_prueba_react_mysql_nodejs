@@ -8,6 +8,7 @@ import Home from './home/home.jsx';
 import Estudiante from "./home/paginaEstudiante.jsx";
 import Informe from "./home/paginaInforme.jsx";
 import CrearEstudiante from "./home/crearEstudiante.jsx"; 
+import PDFDownloadComponent from './home/pdf/PDFDownloadComponent.jsx';
 
 function App() {
   return (

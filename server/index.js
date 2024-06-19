@@ -119,7 +119,7 @@ app.post('/seleccionEstudianteInfo', (req, res) => {
 });
 
 app.post('/seleccionInformesEstudiante', (req, res) => {
-  db.query('SELECT * FROM informes WHERE id_estudiante = ?  order by progreso', [req.body.idEstudiante], (err, results) => {
+  db.query('SELECT * FROM informes WHERE id_estudiante = ?  order by fecha_informe', [req.body.idEstudiante], (err, results) => {
     if (err) return res.json("Error");
     if (results.length > 0) {
       return res.json(results);
@@ -156,6 +156,7 @@ app.post('/agregarInforme', (req, res) => {
     }
 
     db.query('INSERT INTO informes (id_estudiante, fecha_informe, progreso) VALUES (?, ?, ?)', [req.body.id_estudiante, req.body.fecha_informe, req.body.progreso], (err, result) => {
+      
       if (err) {
         return db.rollback(() => {
           res.status(500).send({ error: 'Error al insertar informe', details: err });
@@ -170,8 +171,8 @@ app.post('/agregarInforme', (req, res) => {
           });
         }
 
-        const actividadesValues = req.body.actividades.map(act => [informeId, act.descripcion]);
-        const queryActividades = `INSERT INTO actividades (id_informe, descripcion) VALUES ?`;
+        const actividadesValues = req.body.actividades.map(act => [informeId, act.descripcion, act.fecha]);
+        const queryActividades = `INSERT INTO actividades (id_informe, descripcion,fecha) VALUES ?`;
 
         if (actividadesValues.length > 0) {
           db.query(queryActividades, [actividadesValues], (err, result) => {
@@ -235,10 +236,9 @@ app.post('/actualizarInforme', (req, res) => {
             });
           }
 
-          const actividadesValues = req.body.actividades.map(act => [req.body.id, act.descripcion]);
-
+          const actividadesValues = req.body.actividades.map(act => [req.body.id, act.descripcion, act.fecha]);
           if (actividadesValues.length > 0) {
-            const queryInsertActividades = `INSERT INTO actividades (id_informe, descripcion) VALUES ?`;
+            const queryInsertActividades = `INSERT INTO actividades (id_informe, descripcion, fecha) VALUES ?`;
             db.query(queryInsertActividades, [actividadesValues], (err, result) => {
               if (err) {
                 return db.rollback(() => {
@@ -348,6 +348,17 @@ app.post("/agregarEstudiante", (req, res) => {
   });
 });
 
+app.post("/finalizarInforme", (req, res) => {
+
+  const query = "update informes set finalizado=true where id=?";
+  db.query(query, [req.body.idInforme], (err, result) => {
+    if (err) {
+      res.send({ valid: false });
+    } else {
+      res.send({ valid: true });
+    }
+  });
+});
 
 app.listen(3001, () => {
   console.log("Corriendo en el puerto 3001")
