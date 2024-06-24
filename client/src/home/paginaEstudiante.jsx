@@ -116,6 +116,28 @@ function PaginaUsuarios() {
   }
 
 
+  const anteriorProgreso = (idInforme) => {
+    
+    if (informes.length === 0) {
+      return 0;
+    }
+  
+    if (idInforme !== undefined) {
+      let progreso_anterior = 0;
+      for (let i = 0; i < informes.length; i++) {
+        if (informes[i].id === idInforme) {
+          return progreso_anterior+1;
+        } else {
+          progreso_anterior = informes[i].progreso;
+        }
+      }
+      return 0;
+    } else {
+      return informes[informes.length - 1].progreso + 1;
+    }
+  }
+  
+
   const fechaSiguienteInforme = () => {
     if (informes.length === 0) {
       const fechaAprobacion = estudiante.fechaAprobacion.split('/').reverse().join('-');
@@ -212,7 +234,20 @@ function PaginaUsuarios() {
           <div className="row g-0">
             <div className="col-3"></div>
             <div className="col-md pb-5">
-              <button className="boton" onClick={() => navegar(`/paginaInforme?id_estudiante=${estudianteId}&id_docente=${docenteId}&modificar=${false}`, { state: { fechaInicial: fechaSiguienteInforme() } })}>Agregar Informe</button>
+              <button className="boton" onClick={() => 
+                {
+                  if(informes[informes.length-1].progreso===100){
+                    alerta.fire({
+                      title: 'Alerta',
+                      text: 'El progreso ha llegado al 100%, ya no puede crear mas Informes',
+                      icon: 'warning',
+                      confirmButtonText: 'Aceptar',
+                    });
+                  }else{
+                    navegar(`/paginaInforme?id_estudiante=${estudianteId}&id_docente=${docenteId}&modificar=${false}`, { state: { fechaInicial: fechaSiguienteInforme(), progresoAnterior: anteriorProgreso() } })
+                  }
+                }
+                }>Agregar Informe</button>
             </div>
             <div className="col-md pb-5">
               <PDFDownloadComponent11 informes={informes} />
@@ -262,7 +297,7 @@ function PaginaUsuarios() {
                                   borrarInforme(informe.id);
                                 }
                               })
-                            }else{
+                            } else {
                               borrarInforme(informe.id);
                             }
                           }
@@ -284,11 +319,11 @@ function PaginaUsuarios() {
                             confirmButtonText: 'Si',
                           }).then((resultado) => {
                             if (resultado.isConfirmed) {
-                              navegar(`/paginaInforme?id_estudiante=${estudianteId}&id_docente=${docenteId}&modificar=${true}&id_informe=${informe.id}`, { state: { fechaInicial: new Date(informe.fecha_informe.split('/').reverse().join('-')).toISOString().split('T')[0] } })
+                              navegar(`/paginaInforme?id_estudiante=${estudianteId}&id_docente=${docenteId}&modificar=${true}&id_informe=${informe.id}`, { state: { fechaInicial: new Date(informe.fecha_informe.split('/').reverse().join('-')).toISOString().split('T')[0] ,progresoAnterior: anteriorProgreso(informe.id)} })
                             }
                           });
                         } else {
-                          navegar(`/paginaInforme?id_estudiante=${estudianteId}&id_docente=${docenteId}&modificar=${true}&id_informe=${informe.id}`, { state: { fechaInicial: new Date(informe.fecha_informe.split('/').reverse().join('-')).toISOString().split('T')[0] } })
+                          navegar(`/paginaInforme?id_estudiante=${estudianteId}&id_docente=${docenteId}&modificar=${true}&id_informe=${informe.id}`, { state: { fechaInicial: new Date(informe.fecha_informe.split('/').reverse().join('-')).toISOString().split('T')[0] ,progresoAnterior: anteriorProgreso(informe.id)} })
                         }
                       }
                       }>

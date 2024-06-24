@@ -12,6 +12,7 @@ function PaginaUsuarios() {
   const navegar = useNavigate();
   const location = useLocation();
   const fechaInicial = location.state?.fechaInicial; // Obtén la fecha inicial desde el estado de la navegación
+  const progresoAnterior = location.state?.progresoAnterior; // Obtén la fecha inicial desde el estado de la navegación
 
   Axios.defaults.withCredentials = true;
   const query = new URLSearchParams(useLocation().search);
@@ -269,7 +270,7 @@ function PaginaUsuarios() {
                   <input
                     type="number"
                     max={100}
-                    min={0}
+                    min={progresoAnterior}
                     value={progreso}
                     className="form-control"
                     name="progreso"
